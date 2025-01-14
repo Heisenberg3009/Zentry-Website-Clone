@@ -8,26 +8,41 @@ const navItems = ["Nexus", "Vault", "Prologue", "About", "Contact"];
 
 const Navbar = () => {
   const [isAudioPlaying, setIsAudioPlaying] = useState(false);
-  const [isIndicatorActive, setIsIndicatorActive] = useState(true);
+  const [isIndicatorActive, setIsIndicatorActive] = useState(false);
   const [lastScrollY, setLastScrollY] = useState(0);
   const [isNavVisible, setIsNavVisible] = useState(true);
+  const [hasInteracted, setHasInteracted] = useState(false);
   const navContainerRef = useRef(null);
   const audioElementRef = useRef(null);
   const { y: currentScrollY } = useWindowScroll();
 
   const toggleAudioIndicator = () => {
-    setIsAudioPlaying((prev) => !prev);
-    setIsIndicatorActive((prev) => !prev);
+    if (hasInteracted) {
+      setIsAudioPlaying((prev) => !prev);
+      setIsIndicatorActive((prev) => !prev);
+    }
   };
+
+  useEffect(() => {
+    if (isAudioPlaying) {
+      audioElementRef.current
+        .play()
+        .catch((error) => console.error("Audio play failed:", error));
+    } else {
+      audioElementRef.current.pause();
+    }
+  }, [isAudioPlaying]);
+
   useEffect(() => {
     const startAudioOnInteraction = () => {
-      if (!isAudioPlaying) {
-        setIsAudioPlaying(true);
-        audioElementRef.current.play().catch((error) => {
-          console.error("Audio play failed:", error);
-        });
-      }
+      setHasInteracted(true);
+      setIsAudioPlaying(true);
+      setIsIndicatorActive(true);
+      audioElementRef.current
+        .play()
+        .catch((error) => console.error("Audio play failed:", error));
     };
+
     document.addEventListener("click", startAudioOnInteraction, { once: true });
     document.addEventListener("keydown", startAudioOnInteraction, {
       once: true,
@@ -41,27 +56,16 @@ const Navbar = () => {
       document.removeEventListener("keydown", startAudioOnInteraction);
       document.removeEventListener("touchstart", startAudioOnInteraction);
     };
-  }, [isAudioPlaying]);
-
-  useEffect(() => {
-    if (isAudioPlaying) {
-      audioElementRef.current.play();
-    } else {
-      audioElementRef.current.pause();
-    }
-  }, [isAudioPlaying]);
+  }, []);
 
   useEffect(() => {
     if (currentScrollY === 0) {
-      // Topmost position: show navbar without floating-nav
       setIsNavVisible(true);
       navContainerRef.current.classList.remove("floating-nav");
     } else if (currentScrollY > lastScrollY) {
-      // Scrolling down: hide navbar and apply floating-nav
       setIsNavVisible(false);
       navContainerRef.current.classList.add("floating-nav");
     } else if (currentScrollY < lastScrollY) {
-      // Scrolling up: show navbar with floating-nav
       setIsNavVisible(true);
       navContainerRef.current.classList.add("floating-nav");
     }

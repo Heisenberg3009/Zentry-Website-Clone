@@ -23,6 +23,8 @@ const Story = () => {
                 <img
                   ref={frameRef}
                   onMouseLeave={handleMouseLeave}
+                  onMouseEnter={handleMouseLeave}
+                  onMouseUp={handleMouseLeave}
                   src="/img/entrance.webp"
                   alt="entrance"
                   className="object-contain"

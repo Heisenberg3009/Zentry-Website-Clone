@@ -4,6 +4,28 @@ import { useRef } from "react";
 const Story = () => {
   const frameRef = useRef(null);
   const handleMouseLeave = () => {};
+  const handleMouseMove = (event) => {
+    const { clientX, clientY } = event;
+    const element = frameRef.current;
+    if (!element) return;
+    const rect = element.getBoundingClientRect();
+    const x = clientX - rect.left;
+    const y = clientY - rect.top;
+
+    const centerX = rect.width / 2;
+    const centerY = rect.height / 2;
+
+    const rotateX = ((y - centerY) / centerY) * -10;
+    const rotateY = ((x - centerX) / centerX) * 10;
+
+    gsap.to(element, {
+      duration: 0.3,
+      rotateX,
+      rotateY,
+      transformPerspective: 500,
+      ease: "power2.inOut",
+    });
+  };
 
   return (
     <section id="story" className="min-h-dvh w-screen bg-black text-blue-50">
@@ -25,6 +47,7 @@ const Story = () => {
                   onMouseLeave={handleMouseLeave}
                   onMouseEnter={handleMouseLeave}
                   onMouseUp={handleMouseLeave}
+                  onMouseMove={handleMouseMove}
                   src="/img/entrance.webp"
                   alt="entrance"
                   className="object-contain"
